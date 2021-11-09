@@ -5,6 +5,7 @@ class Matrix extends Grid {
     super(height, width);
     this.width = width;
     this.height = height;
+    //this.elements[19] = ['green', 'green', 'green', 'green', undefined, undefined, 'green', 'green', 'green', 'green'];
   }
 
   removeTetromino(tetromino) {
@@ -43,6 +44,7 @@ class Matrix extends Grid {
 
       if (shouldCheckCollision && isCollidedWithOtherElement) {
         isCollided = true;
+        return;
       }
     });
     return isCollided;
@@ -64,20 +66,33 @@ class Matrix extends Grid {
     return isCollided;
   }
 
-  isCollidedWithSideBorder(tetromino) {
-    let isCollided = '';
+  checkFullLine() {
+    const fullRows = [];
 
-    tetromino.forEach((block, i, j) => {
-      if (tetromino.x + j < 1) {
-        isCollided = 'left';
+    for (let i = 0; i < this.height; i++) {
+      let isFullRow = true;
+      for (let j = 0; j < this.width; j++) {
+        const block = this.elements[i][j];
+        if (!block) {
+          isFullRow = false;
+        }
       }
-
-      if (tetromino.x + j >= this.width - 1) {
-        isCollided = 'right';
+      if (isFullRow === true) {
+        fullRows.push(i);
       }
-    });
+    }
+    return fullRows;
+  }
 
-    return isCollided;
+  removeFullRows(fullRows) {
+    for (let i = this.height - 1; i >= 0; i--) {
+      if (fullRows.includes(i)) {
+        this.elements.splice(i, 1);
+      }
+    }
+    for (let i = 0; i < fullRows.length; i++) {
+      this.elements.splice(0, 0, [null, null, null, null, null, null, null, null, null, null]);
+    }
   }
 }
 

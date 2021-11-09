@@ -7,19 +7,23 @@ import S from '../models/Tetrominos/S';
 import Z from '../models/Tetrominos/Z';
 import T from '../models/Tetrominos/T';
 import MatrixView from '../views/MatrixView';
+import ScoreView from '../views/ScoreView';
 
 class Game {
   constructor() {
     this.matrix = new Matrix();
     this.matrixView = new MatrixView();
-    this.main = this.main.bind(this);
+    this.scoreView = new ScoreView();
+    this.drop = this.drop.bind(this);
 
     this.spawnNewTetromino();
 
     this.matrixView.render(this.matrix);
+
+    this.score = 0;
   }
 
-  main() {
+  drop() {
     if (this.currentTetromino == null) {
       this.spawnNewTetromino();
     }
@@ -27,7 +31,12 @@ class Game {
       this.matrix.removeTetromino(this.currentTetromino);
       this.currentTetromino.drop();
       this.matrix.update(this.currentTetromino);
-      this.matrix.isCollided(this.currentTetromino) && (this.currentTetromino = null);
+      if (this.matrix.isCollided(this.currentTetromino)) {
+        this.currentTetromino = null;
+        const fullRows = this.matrix.checkFullLine();
+        this.matrix.removeFullRows(fullRows);
+        this.updateScore(fullRows.length);
+      }
     }
 
     this.matrixView.render(this.matrix);
@@ -39,8 +48,9 @@ class Game {
   }
 
   getRandomTetromino() {
-    const pieces = [L, J, I, O, S, Z, T];
-    const pieceIndex = Math.floor(Math.random() * 7);
+    //const pieces = [L, J, I, O, S, Z, T];
+    const pieces = [O];
+    const pieceIndex = Math.floor(Math.random() * pieces.length);
 
     return new pieces[pieceIndex]();
   }
@@ -60,6 +70,11 @@ class Game {
     this.matrix.update(this.currentTetromino);
 
     this.matrixView.render(this.matrix);
+  }
+
+  updateScore(rowsCompleted) {
+    this.score += rowsCompleted * 10;
+    this.scoreView.update(this.score);
   }
 }
 
